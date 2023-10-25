@@ -270,13 +270,20 @@ void motor1()
       {
       }
     }
-    else if (button1.getState() == 0 && button2.getState() == 1)
-    else if (button1.getState() == 1 && button2.getState() == 0)
+    else if (button1.getState() == 0 && button2.getState() == 1){
+      // geser samping
+      // variabel noDetect bertambah
+    }
+    else if (button1.getState() == 1 && button2.getState() == 0){
+      // geser samping stop
+      // bisa gerak naik dan turun aja
+      // variabel no detect bertambah
+    }
     else if (button1.getState() == 0 && button2.getState() == 0)
     {
       /* code */
     }
-    
+    // stack
   }
 
   void motor2()
