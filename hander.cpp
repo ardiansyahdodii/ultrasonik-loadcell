@@ -1,6 +1,6 @@
 // HERE LIES ALL THE DREAMS I WANTED 'makan'
 
-
+// mind the gap
 
 // Library yang diperlukan
 #include <Stepper.h>
