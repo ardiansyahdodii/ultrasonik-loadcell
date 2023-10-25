@@ -256,18 +256,22 @@ void motor1()
       // Ketika Bergerak Naik => gerak samping dan turun
       else if (jarak1 <= 0 && naik)
       {
+
       }
       // Bergerak Turun
       else if (jarak1 > 0 && !naik)
       {
+
       }
       // Mentok Bawah ada objek (Tidak mentok atas dan samping)
       else if (jarak1 > 0 && !naik && langkah == 0)
       {
+
       }
       // Mentok Bawah tidak ada objek (Tidak mentok atas dan samping)
       else if (jarak1 <= 0 && !naik && langkah == 0)
       {
+
       }
     }
     else if (button1.getState() == 0 && button2.getState() == 1){
@@ -285,127 +289,128 @@ void motor1()
     }
     // stack
   }
+}
 
-  void motor2()
+void motor2()
+{
+
+  counter2 = true;
+
+  while (counter2)
   {
+    // Sensor 2
+    digitalWrite(trig2, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trig2, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trig2, LOW);
 
-    counter2 = true;
+    // Sensor 2
+    long duration2, distance2;
+    duration2 = pulseIn(echo2, HIGH);
+    distance2 = (duration2 * 0.034) / 2;
 
-    while (counter2)
+    long jarak2 = 98 - distance2;
+
+    // membuat pengodisian berhenti saat sensor naik
+    if (jarak2 > 0 && noDetect2 < 3)
     {
-      // Sensor 2
-      digitalWrite(trig2, LOW);
-      delayMicroseconds(2);
-      digitalWrite(trig2, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trig2, LOW);
-
-      // Sensor 2
-      long duration2, distance2;
-      duration2 = pulseIn(echo2, HIGH);
-      distance2 = (duration2 * 0.034) / 2;
-
-      long jarak2 = 98 - distance2;
-
-      // membuat pengodisian berhenti saat sensor naik
-      if (jarak2 > 0 && noDetect2 < 3)
-      {
-        if (naik2 == true && langkah2 < 21)
-        {
-          Serial.println(jarak2);
-          myStepper3.step(-stepsPerRevolution);
-          langkah2 += 1;
-          noDetect2 = 0;
-          counter2 = true;
-        }
-        if (naik2 == true && langkah2 >= 21)
-        {
-          Serial.println(jarak2);
-          myStepper3.step(stepsPerRevolution);
-          langkah2 -= 1;
-          naik2 = false;
-          counter2 = true;
-
-          if (langkahSamping2 <= 5)
-          {
-            myStepper4.step(-stepsPerRevolution1);
-            langkahSamping2 += 1;
-            noDetect2 = 0;
-          }
-          else
-          {
-            noDetect2 += 1;
-          }
-        }
-        else if (naik2 == false)
-        {
-          Serial.println(jarak2);
-          myStepper3.step(stepsPerRevolution);
-          langkah2 -= 1;
-          // noDetect2 = 0;
-          counter2 = true;
-
-          if (langkah2 == 0)
-          {
-            if (langkahSamping2 < 5)
-            {
-              Serial.println(jarak2);
-              myStepper4.step(-stepsPerRevolution1);
-              langkah2 = 0;
-              naik2 = true;
-              noDetect2 = 0;
-              counter2 = true;
-              langkahSamping2 += 1;
-            }
-            else
-            {
-              langkah2 = 0;
-              noDetect2 += 1;
-            }
-          }
-        }
-      }
-      // ketika sensor sudah tidak mendeteksi objek terluar(berhenti di pojok objk)
-      else if (jarak2 <= 0 && noDetect2 < 3)
+      if (naik2 == true && langkah2 < 21)
       {
         Serial.println(jarak2);
+        myStepper3.step(-stepsPerRevolution);
+        langkah2 += 1;
+        noDetect2 = 0;
         counter2 = true;
-        noDetect2 += 1;
+      }
+      if (naik2 == true && langkah2 >= 21)
+      {
+        Serial.println(jarak2);
+        myStepper3.step(stepsPerRevolution);
+        langkah2 -= 1;
+        naik2 = false;
+        counter2 = true;
 
-        if (langkahSamping2 < 5)
+        if (langkahSamping2 <= 5)
         {
           myStepper4.step(-stepsPerRevolution1);
           langkahSamping2 += 1;
+          noDetect2 = 0;
+        }
+        else
+        {
+          noDetect2 += 1;
+        }
+      }
+      else if (naik2 == false)
+      {
+        Serial.println(jarak2);
+        myStepper3.step(stepsPerRevolution);
+        langkah2 -= 1;
+        // noDetect2 = 0;
+        counter2 = true;
 
-          if (langkah2 > 0)
+        if (langkah2 == 0)
+        {
+          if (langkahSamping2 < 5)
           {
-            myStepper3.step(stepsPerRevolution);
-            langkah2 -= 1;
-            naik2 = false;
-          }
-          if (langkah2 == 0)
-          {
-            myStepper3.step(-stepsPerRevolution);
-            langkah2 += 1;
+            Serial.println(jarak2);
+            myStepper4.step(-stepsPerRevolution1);
+            langkah2 = 0;
             naik2 = true;
+            noDetect2 = 0;
+            counter2 = true;
+            langkahSamping2 += 1;
+          }
+          else
+          {
+            langkah2 = 0;
+            noDetect2 += 1;
           }
         }
       }
-      else
+    }
+    // ketika sensor sudah tidak mendeteksi objek terluar(berhenti di pojok objk)
+    else if (jarak2 <= 0 && noDetect2 < 3)
+    {
+      Serial.println(jarak2);
+      counter2 = true;
+      noDetect2 += 1;
+
+      if (langkahSamping2 < 5)
       {
-        // Reset atau posisi sensor berhenti
-        counter2 = false;
-        while (langkah2 > 0)
+        myStepper4.step(-stepsPerRevolution1);
+        langkahSamping2 += 1;
+
+        if (langkah2 > 0)
         {
           myStepper3.step(stepsPerRevolution);
           langkah2 -= 1;
+          naik2 = false;
         }
-        while (langkahSamping2 > 0)
+        if (langkah2 == 0)
         {
-          myStepper4.step(stepsPerRevolution1);
-          langkahSamping2 -= 1;
+          myStepper3.step(-stepsPerRevolution);
+          langkah2 += 1;
+          naik2 = true;
         }
       }
-      // delay(200);
     }
+    else
+    {
+      // Reset atau posisi sensor berhenti
+      counter2 = false;
+      while (langkah2 > 0)
+      {
+        myStepper3.step(stepsPerRevolution);
+        langkah2 -= 1;
+      }
+      while (langkahSamping2 > 0)
+      {
+        myStepper4.step(stepsPerRevolution1);
+        langkahSamping2 -= 1;
+      }
+    }
+    // delay(200);
   }
+}
