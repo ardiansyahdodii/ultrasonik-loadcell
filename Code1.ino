@@ -6,26 +6,26 @@
 // deklarasi kelas kalman filter
 class kalmanfilter
 {
-  float initial_state = 0;
-  float process_variance = 1;
-  float measurement_variance = 0.1;
+    float initial_state = 0;
+    float process_variance = 1;
+    float measurement_variance = 0.1;
 
-public:
-  float state, kalman_gain;
+  public:
+    float state, kalman_gain;
 
-  kalmanfilter()
-  {
-    state = initial_state;
-    process_variance = process_variance;
-    measurement_variance = measurement_variance;
-  }
+    kalmanfilter()
+    {
+      state = initial_state;
+      process_variance = process_variance;
+      measurement_variance = measurement_variance;
+    }
 
-  float update_state(float measurement)
-  {
-    kalman_gain = process_variance / (process_variance + measurement_variance);
-    state = state + kalman_gain * (measurement - state);
-    return state;
-  }
+    float update_state(float measurement)
+    {
+      kalman_gain = process_variance / (process_variance + measurement_variance);
+      state = state + kalman_gain * (measurement - state);
+      return state;
+    }
 };
 
 // inisialisasi variabel
@@ -161,7 +161,7 @@ void loop()
         motor1();
         delay(500);
         Serial.println("mengukur panjang");
-        motor2();
+        //motor2();
         mengukur = false;
 
         // waktu berakhir
@@ -246,166 +246,219 @@ void motor1()
     //    Serial.print(jarak1);
     //    Serial.print(",");
 
-    if (button1.getState() == 1 && button2.getState() == 1)
+    if (button1.getState() == 1 && button2.getState() == 1 && noDetect < 3)
     {
       // Bergerak Naik (ada objek)
       if (jarak1 > 0 && naik)
       {
-
+        Serial.print("Lebar : ");
+        Serial.println(jarak1);
+        myStepper1.step(-stepPerRevolition);
+        langkah += 1;
+        noDetect = 0;
+        counter = true;
       }
       // Ketika Bergerak Naik => gerak samping dan turun
       else if (jarak1 <= 0 && naik)
       {
+        Serial.print("Lebar : ");
+        Serial.println(jarak1);
+        myStepper2.step(stepPerRevolition1);
+        langkahSamping += 1;
+        noDetect += 1;
+        counter = true;
+        naik = false;
       }
       // Bergerak Turun
-      else if (jarak1 > 0 && !naik)
+      else if (jarak1 > 0 && !naik && langkah > 0)
       {
+        Serial.print("Lebar : ");
+        Serial.println(jarak1);
+        myStepper1.step(stepPerRevolition);
+        langkah -= 1;
+        noDetect = 0;
+        counter = true;
+        naik = false;
+
       }
       // Mentok Bawah ada objek (Tidak mentok atas dan samping)
       else if (jarak1 > 0 && !naik && langkah == 0)
       {
+        Serial.print("Lebar : ");
+        Serial.println(jarak1);
+        myStepper2.step(stepPerRevolition1);
+        langkahSamping += 1;
+        noDetect += 1;
+        naik = true;
       }
       // Mentok Bawah tidak ada objek (Tidak mentok atas dan samping)
       else if (jarak1 <= 0 && !naik && langkah == 0)
       {
+        Serial.print("Lebar : ");
+        Serial.println(jarak1);
+        myStepper2.step(stepPerRevolition1);
+        langkahSamping += 1;
+        noDetect += 1;
+        naik = true;
+      }
+      else if (jarak1 <= 0 && naik && langkah == 0)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak1);
+        myStepper2.step(stepPerRevolition1);
+        langkahSamping += 1;
+        noDetect += 1;
+        naik = false;
       }
     }
-    else if (button1.getState() == 0 && button2.getState() == 1){
+    else if (button1.getState() == 0 && button2.getState() == 1) {
       // geser samping
+      myStepper2.step(stepPerRevolition1);
       // variabel noDetect bertambah
+      noDetect += 1;
     }
-    else if (button1.getState() == 1 && button2.getState() == 0){
+    else if (button1.getState() == 1 && button2.getState() == 0) {
       // geser samping stop
       // bisa gerak naik dan turun aja
       // variabel no detect bertambah
+      noDetect += 1;
     }
     else if (button1.getState() == 0 && button2.getState() == 0)
     {
-      /* code */
+      noDetect = 3;
     }
     // stack
-  }
-
-  void motor2()
-  {
-
-    counter2 = true;
-
-    while (counter2)
-    {
-      // Sensor 2
-      digitalWrite(trig2, LOW);
-      delayMicroseconds(2);
-      digitalWrite(trig2, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trig2, LOW);
-
-      // Sensor 2
-      long duration2, distance2;
-      duration2 = pulseIn(echo2, HIGH);
-      distance2 = (duration2 * 0.034) / 2;
-
-      long jarak2 = 98 - distance2;
-
-      // membuat pengodisian berhenti saat sensor naik
-      if (jarak2 > 0 && noDetect2 < 3)
+    else if (noDetetct >= 3) {
+      counter = false;
+      while (langkah > 0)
       {
-        if (naik2 == true && langkah2 < 21)
-        {
-          Serial.println(jarak2);
-          myStepper3.step(-stepsPerRevolution);
-          langkah2 += 1;
-          noDetect2 = 0;
-          counter2 = true;
-        }
-        if (naik2 == true && langkah2 >= 21)
-        {
-          Serial.println(jarak2);
-          myStepper3.step(stepsPerRevolution);
-          langkah2 -= 1;
-          naik2 = false;
-          counter2 = true;
-
-          if (langkahSamping2 <= 5)
-          {
-            myStepper4.step(-stepsPerRevolution1);
-            langkahSamping2 += 1;
-            noDetect2 = 0;
-          }
-          else
-          {
-            noDetect2 += 1;
-          }
-        }
-        else if (naik2 == false)
-        {
-          Serial.println(jarak2);
-          myStepper3.step(stepsPerRevolution);
-          langkah2 -= 1;
-          // noDetect2 = 0;
-          counter2 = true;
-
-          if (langkah2 == 0)
-          {
-            if (langkahSamping2 < 5)
-            {
-              Serial.println(jarak2);
-              myStepper4.step(-stepsPerRevolution1);
-              langkah2 = 0;
-              naik2 = true;
-              noDetect2 = 0;
-              counter2 = true;
-              langkahSamping2 += 1;
-            }
-            else
-            {
-              langkah2 = 0;
-              noDetect2 += 1;
-            }
-          }
-        }
+        myStepper1.step(stepsPerRevolution);
+        langkah -= 1;
       }
-      // ketika sensor sudah tidak mendeteksi objek terluar(berhenti di pojok objk)
-      else if (jarak2 <= 0 && noDetect2 < 3)
+      while (langkahSamping > 0)
       {
-        Serial.println(jarak2);
-        counter2 = true;
-        noDetect2 += 1;
-
-        if (langkahSamping2 < 5)
-        {
-          myStepper4.step(-stepsPerRevolution1);
-          langkahSamping2 += 1;
-
-          if (langkah2 > 0)
-          {
-            myStepper3.step(stepsPerRevolution);
-            langkah2 -= 1;
-            naik2 = false;
-          }
-          if (langkah2 == 0)
-          {
-            myStepper3.step(-stepsPerRevolution);
-            langkah2 += 1;
-            naik2 = true;
-          }
-        }
+        myStepper2.step(-stepsPerRevolution1);
+        langkahSamping -= 1;
       }
-      else
-      {
-        // Reset atau posisi sensor berhenti
-        counter2 = false;
-        while (langkah2 > 0)
-        {
-          myStepper3.step(stepsPerRevolution);
-          langkah2 -= 1;
-        }
-        while (langkahSamping2 > 0)
-        {
-          myStepper4.step(stepsPerRevolution1);
-          langkahSamping2 -= 1;
-        }
-      }
-      // delay(200);
     }
   }
+}
+void motor2()
+{
+
+  counter2 = true;
+
+  while (counter2)
+  {
+    // Sensor 2
+    digitalWrite(trig2, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trig2, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trig2, LOW);
+
+    // Sensor 2
+    long duration2, distance2;
+    duration2 = pulseIn(echo2, HIGH);
+    distance2 = (duration2 * 0.034) / 2;
+
+    long jarak2 = 98 - distance2;
+
+    // membuat pengodisian berhenti saat sensor naik
+    if (button3.getState() == 1 && button4.getState() == 1 && noDetect < 3)
+    {
+      // Bergerak Naik (ada objek)
+      if (jarak2 > 0 && naik2)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak2);
+        myStepper3.step(-stepPerRevolition);
+        langkah2 += 1;
+        noDetect2 = 0;
+        counter2 = true;
+      }
+      // Ketika Bergerak Naik => gerak samping dan turun
+      else if (jarak2 <= 0 && naik2)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak2);
+        myStepper4.step(-stepPerRevolition);
+        langkahSamping2 += 1;
+        noDetect2 += 1;
+        counter2 = true;
+        naik2 = false;
+      }
+      // Bergerak Turun
+      else if (jarak2 > 0 && !naik2 && langkah2 > 0)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak2);
+        myStepper3.step(stepPerRevolition);
+        langkah2 -= 1;
+        noDetect2 = 0;
+        counter2 = true;
+        naik2 = false;
+
+      }
+      // Mentok Bawah ada objek (Tidak mentok atas dan samping)
+      else if (jarak2 > 0 && !naik2 && langkah2 == 0)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak2);
+        myStepper4.step(-stepPerRevolition);
+        langkahSamping2 += 1;
+        noDetect2 += 1;
+        naik2 = true;
+      }
+      // Mentok Bawah tidak ada objek (Tidak mentok atas dan samping)
+      else if (jarak2 <= 0 && !naik2 && langkah2 == 0)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak2);
+        myStepper4.step(-stepPerRevolition);
+        langkahSamping2 += 1;
+        noDetect2 += 1;
+        naik2 = true;
+      }
+      else if (jarak2 <= 0 && naik2 && langkah2 == 0)
+      {
+        Serial.print("Lebar : ");
+        Serial.println(jarak2);
+        myStepper4.step(-stepPerRevolition);
+        langkahSamping2 += 1;
+        noDetect2 += 1;
+        naik2 = false;
+      }
+    }
+    else if (button3.getState() == 0 && button4.getState() == 1) {
+      // geser samping
+      myStepper4.step(stepPerRevolition);
+      // variabel noDetect bertambah
+      noDetect2 += 1;
+    }
+    else if (button3.getState() == 1 && button4.getState() == 0) {
+      // geser samping stop
+      // bisa gerak naik dan turun aja
+      // variabel no detect bertambah
+      noDetect2 += 1;
+    }
+    else if (button3.getState() == 0 && button4.getState() == 0)
+    {
+      noDetect2 = 3;
+    }
+    // stack
+    else if (noDetetct2 >= 3) {
+      counter2 = false;
+      while (langkah2 > 0)
+      {
+        myStepper3.step(stepsPerRevolution);
+        langkah2 -= 1;
+      }
+      while (langkahSamping2 > 0)
+      {
+        myStepper4.step(stepsPerRevolution1);
+        langkahSamping2 -= 1;
+      }
+    }
+  }
+}
